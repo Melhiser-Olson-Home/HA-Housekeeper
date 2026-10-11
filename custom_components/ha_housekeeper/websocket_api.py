@@ -54,7 +54,7 @@ from .cleanup import (
     trim_is_plain,
 )
 from .cleanup_exec import CleanupError, entity_restorable
-from .const import DOMAIN, OPTION_LIMITS
+from .const import CONF_NODERED_PASSWORD, CONF_NODERED_TOKEN, DOMAIN, OPTION_LIMITS
 from .device_pairs import pair_devices
 from .history import PinError
 from .ignored import KINDS as IGNORE_KINDS
@@ -297,7 +297,10 @@ def websocket_set_options(
     options = {**entry.options, **changes}
     if options != dict(entry.options):
         hass.config_entries.async_update_entry(entry, options=options)
-    connection.send_result(msg["id"], {"options": options})
+    secret = (CONF_NODERED_PASSWORD, CONF_NODERED_TOKEN)  # never sent to the browser
+    connection.send_result(
+        msg["id"], {"options": {k: v for k, v in options.items() if k not in secret}}
+    )
 
 
 async def _plan_from_requests(

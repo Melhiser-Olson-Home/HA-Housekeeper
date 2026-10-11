@@ -225,6 +225,16 @@ The **Changes** view compares the current state with the previous scan or with t
 - **More reference sources**: groups (members) and helpers such as template, derivative, or min/max sensors (source entities) are included in dependencies and impact analysis; missing members and sources are reported as findings.
 - **Deep links**: the panel supports addresses like `/ha-housekeeper?view=findingsNav&filter=orphaned` or `?object=entity:sensor.x`; the repair hints use them.
 
+### Node-RED flows
+
+Automations built in Node-RED live outside Home Assistant, so on their own they would leave entities and devices looking unused. Enter the Node-RED address under **Settings → Devices & services → HA Housekeeper → Configure** (plus a username and password, or an access token, if the editor needs a login). Housekeeper then reads the flows through the Node-RED admin API with a read-only token on every scan. It never writes to Node-RED.
+
+- Every enabled flow tab and subflow becomes a **Node-RED flow** object. Its enabled nodes link to what they use, like an automation's links do. Cleanup, *Not used*, impact and the dependency view all take them into account.
+- Fields of Home Assistant nodes (`api-call-service`, `trigger-state`, `server-state-changed`, `poll-state`, `api-current-state`, …) that name an entity, device, area, floor or label are **certain**. A Node-RED flow that names an entity that no longer exists produces a *missing reference* finding.
+- Entity IDs in templates, function code and switch or change rules are **probable**. So are device IDs and **device serial numbers** found there. Event-driven flows (for example Lutron Pico remotes matched by serial from `lutron_caseta_button_event`) then mark the *device* as possibly used, so disabling or removing it shows a warning. The device's own entities are judged by their own links, so unused ones remain candidates.
+- If Node-RED cannot be reached, the scan uses the flows from the last successful read and the overview says so. That way an outage never makes Node-RED's uses vanish.
+- Replacing references and renaming list Node-RED flows as places to adjust by hand.
+
 ### Dependency explorer
 
 The dependency view visualizes direct relationships such as:
@@ -233,6 +243,7 @@ The dependency view visualizes direct relationships such as:
 Integration → owns → Device → provides → Entity
 Floor → contains → Area → contains → Device
 Automation → triggers on / checks / targets → Entity or Device
+Node-RED flow → triggers on / checks / targets → Entity, Device or Area
 ```
 
 Each relationship includes a confidence level. Explicit registry and configuration relationships are marked as certain; references inferred by Home Assistant at runtime are identified separately.

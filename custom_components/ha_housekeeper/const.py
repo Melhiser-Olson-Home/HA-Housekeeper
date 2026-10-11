@@ -34,6 +34,7 @@ BATTERY_STORAGE_KEY: Final = f"{DOMAIN}.batteries"
 WINDOW_STORAGE_KEY: Final = f"{DOMAIN}.window"
 NOTIFY_STORAGE_KEY: Final = f"{DOMAIN}.notify"
 STALE_STORAGE_KEY: Final = f"{DOMAIN}.stale"
+NODERED_STORAGE_KEY: Final = f"{DOMAIN}.nodered"
 STORAGE_VERSION: Final = 1
 
 CONF_MIN_UNAVAILABLE_DAYS: Final = "min_unavailable_days"
@@ -46,6 +47,11 @@ CONF_LOW_BATTERY_PERCENT: Final = "low_battery_percent"
 DEFAULT_LOW_BATTERY_PERCENT: Final = 20
 CONF_STALE_HOURS: Final = "stale_hours"
 DEFAULT_STALE_HOURS: Final = 48
+# Node-RED admin API; flows read there count as consumers of entities and devices.
+CONF_NODERED_URL: Final = "nodered_url"
+CONF_NODERED_USERNAME: Final = "nodered_username"
+CONF_NODERED_PASSWORD: Final = "nodered_password"
+CONF_NODERED_TOKEN: Final = "nodered_token"
 CONF_HISTORY_DAYS: Final = "history_days"
 DEFAULT_HISTORY_DAYS: Final = 30
 JOURNAL_STORAGE_KEY: Final = f"{DOMAIN}.journal"

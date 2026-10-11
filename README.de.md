@@ -225,6 +225,15 @@ Die Ansicht **Änderungen** vergleicht den aktuellen Stand mit dem Scan davor od
 - **Weitere Referenzquellen**: Gruppen (Mitglieder) und Helfer wie Template, Ableitung oder Min/Max-Sensor (Quell-Entitäten) werden in Abhängigkeiten und Auswirkungsanalyse berücksichtigt; fehlende Mitglieder und Quellen werden als Befund gemeldet.
 - **Deep-Links**: Das Panel unterstützt Adressen wie `/ha-housekeeper?view=findingsNav&filter=orphaned` oder `?object=entity:sensor.x`; die Reparaturhinweise nutzen sie.
 
+### Node-RED-Flows
+
+In Node-RED gebaute Automationen liegen außerhalb von Home Assistant; ohne sie wirken dort genutzte Entitäten und Geräte unbenutzt. Trage unter **Einstellungen → Geräte & Dienste → HA Housekeeper → Konfigurieren** die Node-RED-Adresse ein (bei Bedarf Benutzername und Passwort oder ein Zugriffstoken). Housekeeper liest die Flows dann bei jedem Scan über die Node-RED-Admin-API mit einem Lese-Token und schreibt nie etwas nach Node-RED.
+
+- Jeder aktive Flow-Tab und Subflow wird zum Objekt **Node-RED-Flow**; seine aktiven Knoten verweisen auf das, was sie nutzen. Aufräumen, *Nicht verwendet*, Auswirkung und Abhängigkeitsansicht berücksichtigen sie.
+- Felder der Home-Assistant-Knoten, die eine Entität, ein Gerät, einen Bereich, eine Etage oder ein Label nennen, sind **sicher**; fehlt das Ziel, gibt es einen Befund *fehlender Verweis*.
+- Entitäts-IDs in Vorlagen, Funktionscode und Regeln sind **wahrscheinlich**, ebenso Geräte-IDs und **Seriennummern** von Geräten (z. B. Lutron-Picos aus `lutron_caseta_button_event`). Das Gerät warnt dann vor dem Deaktivieren oder Entfernen; seine eigenen Entitäten werden nach ihren eigenen Verweisen beurteilt.
+- Ist Node-RED nicht erreichbar, gelten die zuletzt gelesenen Flows, und die Übersicht sagt es.
+
 ### Abhängigkeitsansicht
 
 Die Abhängigkeitsansicht stellt direkte Beziehungen dar, zum Beispiel:

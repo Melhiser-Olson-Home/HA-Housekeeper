@@ -201,6 +201,8 @@ async def load_source(
             "item": item,
             "hash": json_hash(item),
         }
+    if kind == "nodered_flow":  # lives in Node-RED, which Housekeeper only reads
+        raise SourceError("nodered")
     raise SourceError("not_editable")
 
 
@@ -243,6 +245,7 @@ async def collect_sources(
     list of sources. Sources that cannot be rewritten are listed with the reason.
     """
     sources: list[dict[str, Any]] = []
+    names = {f"{o['object_type']}:{o['object_id']}": o.get("name") for o in snapshot["objects"]}
     for key in source_keys(snapshot, old):
         kind, _, ident = key.partition(":")
         entry: dict[str, Any] = {
@@ -256,7 +259,7 @@ async def collect_sources(
             sources.append(
                 {
                     **entry,
-                    "name": ident,
+                    "name": names.get(key) or ident,
                     "writable": False,
                     "reason": str(err),
                     "hash": None,

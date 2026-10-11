@@ -98,7 +98,7 @@ class DiagnosisMixin {
       const helperBroken = this.data.findings.filter(f => f.rule_id === "config_entry.missing_entity" && f.object_id === item.object_id);
       helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
       if (helperBroken.length) { cause = t("cause_helper_broken", { count: helperBroken.length }); hint = t("hint_helper_broken"); tone = "red"; }
-    } else if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) {
+    } else if (["automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) {
       const key = this.objectKey(item);
       const broken = this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_"));
       broken.forEach(f => rows.push(this.check(t(f.rule_id.split(".")[1]), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
@@ -131,7 +131,7 @@ class DiagnosisMixin {
 
   // Read-only what-if: which automations would lose a reference if this object (and what it owns) were removed.
   impact(item, key) {
-    if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) return null;
+    if (["automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) return null;
     const OWNED = ["PROVIDES", "OWNS"], USAGE = USAGE_RELATIONS;
     const scope = new Set([key]);
     for (const member of scope) { // grows while iterating: what the object owns, and what that owns
@@ -143,7 +143,7 @@ class DiagnosisMixin {
     for (const member of scope) used.push(...this.edgesTo(member));
     used.sort((a, b) => order.get(a) - order.get(b)); // the order of the edges as scanned
     for (const e of used) {
-      if (!USAGE.includes(e.relation) || !scope.has(e.target) || scope.has(e.source) || !(/^(automation|script|scene|dashboard|config_entry):/.test(e.source) || e.relation === "INCLUDES")) continue;
+      if (!USAGE.includes(e.relation) || !scope.has(e.target) || scope.has(e.source) || !(/^(automation|script|scene|dashboard|config_entry|nodered_flow):/.test(e.source) || e.relation === "INCLUDES")) continue;
       const hit = byAutomation.get(e.source) || { key: e.source, certain: false, places: [] };
       if (e.confidence === "certain") hit.certain = true;
       if (e.location && e.location !== "runtime_extraction") hit.places.push(e.location);
@@ -193,7 +193,7 @@ class DiagnosisMixin {
     const min = this.data.meta.min_unavailable_days || 0;
     const facts = [];
     if (item.status_since) facts.push([this.t("since"), `${this.formatDate(item.status_since)}<small>${this.esc(this.relTime(item.status_since))} · ${this.t("firstSeenNote")}</small>`]);
-    if (["entity", "automation", "script", "scene", "dashboard"].includes(item.object_type)) {
+    if (["entity", "automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) {
       facts.push([this.t("finding"), finding ? `${this.pill(finding.classification)}<small>${this.t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : this.t("noFinding")]);
     }
     const quarantined = ["entity", "device"].includes(item.object_type) ? this.quarantineOf(item.object_id) : null;
@@ -305,7 +305,7 @@ class DiagnosisMixin {
     const tablist = tabs.map(([id, label, count]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
-      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
+      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}${/^https?:\/\//.test(item.editor_url || "") ? `<a class="btn" href="${this.esc(item.editor_url)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInNodeRed")}</a>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
       <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${this.detailPanel(tab, item, key)}</div>`;

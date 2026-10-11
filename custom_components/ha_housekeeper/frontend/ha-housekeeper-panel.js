@@ -25,7 +25,7 @@ const TEXT = {
     graphHint: "Wähle ein Objekt aus, um seine direkten Beziehungen zu untersuchen.",
     select: "Objekt auswählen", firstObservation: "Erster durch Housekeeper bestätigter Zeitpunkt",
     entity: "Entität", device: "Gerät", config_entry: "Integration", area: "Bereich",
-    automation: "Automation", script: "Skript", scene: "Szene", dashboard: "Dashboard", SHOWS: "zeigt an", entity_disabled: "Entität wurde deaktiviert",
+    automation: "Automation", script: "Skript", scene: "Szene", dashboard: "Dashboard", nodered_flow: "Node-RED-Flow", SHOWS: "zeigt an", entity_disabled: "Entität wurde deaktiviert",
     floor: "Etage", label: "Label", broken_reference: "Defekte Referenz",
     triggers: "Trigger", conditions: "Bedingungen", actions: "Aktionen",
     automationStructure: "Automationsstruktur", previous: "Zurück", next: "Weiter",
@@ -144,7 +144,7 @@ const TEXT = {
     result_removed: "Entfernt", undo_restored: "wiederhergestellt (wieder in Quarantäne)", undo_conflict_taken: "nicht wiederhergestellt: Entitäts-ID inzwischen belegt", undo_conflict_unrestorable: "nicht wiederhergestellt: Integration existiert nicht mehr",
     check_removed: "Entität ist entfernt", plan_status_backup: "Backup läuft", backupRunning: "Backup läuft … das kann etwas dauern.", daysLeftShort: "noch {days} Tage", removalCandidatesHint: "Entitäten in Quarantäne. Entfernen ist erst nach {days} Tagen möglich.", removalReady: "Bereit", waitingShort: "Wartet",
     perPage: "Pro Seite", cleanup: "Aufräumen", cleanupHint: "Hinweise, die einen Blick wert sind",
-    unreferenced: "Nicht verwendet", unreferencedSubtitle: "Aktive Entitäten, die in keiner Automation, keinem Skript, keiner Szene, Gruppe, keinem Helfer und keinem lesbaren Dashboard vorkommen.",
+    unreferenced: "Nicht verwendet", unreferencedSubtitle: "Aktive Entitäten, die in keiner Automation, keinem Skript, keiner Szene, Gruppe, keinem Helfer, keinem lesbaren Dashboard und keinem Node-RED-Flow vorkommen.",
     unreferencedHint: "Nur ein Hinweis, keine Empfehlung zum Löschen: Entitäten können auch über Sprachassistenten, Apps, das Energie-Dashboard, automatisch erzeugte Dashboards oder externe Systeme genutzt werden. Diagnose- und Konfigurations-Entitäten sind ausgeblendet.",
     noUnreferenced: "Alle aktiven Entitäten werden irgendwo verwendet.", unrefShown: "{shown} von {total} angezeigt – nach Domäne filtern, um weitere zu sehen.", allDomains: "Alle Domänen",
     noBatteries: "Keine Batterie-Entitäten gefunden.", batteryLevel: "Ladestand", integrationProblems: "Integrationen mit Problemen",
@@ -205,7 +205,7 @@ const TEXT = {
     graphHint: "Select an object to inspect its direct relationships.",
     select: "Select object", firstObservation: "First confirmed observation by Housekeeper",
     entity: "Entity", device: "Device", config_entry: "Integration", area: "Area",
-    automation: "Automation", script: "Script", scene: "Scene", dashboard: "Dashboard", SHOWS: "shows", entity_disabled: "Entity was disabled",
+    automation: "Automation", script: "Script", scene: "Scene", dashboard: "Dashboard", nodered_flow: "Node-RED flow", SHOWS: "shows", entity_disabled: "Entity was disabled",
     floor: "Floor", label: "Label", broken_reference: "Broken reference",
     triggers: "Triggers", conditions: "Conditions", actions: "Actions",
     automationStructure: "Automation structure", previous: "Previous", next: "Next",
@@ -324,7 +324,7 @@ const TEXT = {
     result_removed: "Removed", undo_restored: "restored (back in quarantine)", undo_conflict_taken: "not restored: entity ID is taken now", undo_conflict_unrestorable: "not restored: the integration no longer exists",
     check_removed: "Entity is removed", plan_status_backup: "Backup running", backupRunning: "Backup running … this can take a while.", daysLeftShort: "{days} days to go", removalCandidatesHint: "Entities in quarantine. Removal is possible only after {days} days.", removalReady: "Ready", waitingShort: "Waiting",
     perPage: "Per page", cleanup: "Tidy up", cleanupHint: "Hints worth a look",
-    unreferenced: "Not used", unreferencedSubtitle: "Active entities that appear in no automation, script, scene, group, helper, or readable dashboard.",
+    unreferenced: "Not used", unreferencedSubtitle: "Active entities that appear in no automation, script, scene, group, helper, readable dashboard, or Node-RED flow.",
     unreferencedHint: "A hint only, not a recommendation to delete: entities can also be used by voice assistants, apps, the energy dashboard, auto-generated dashboards, or external systems. Diagnostic and configuration entities are hidden.",
     noUnreferenced: "Every active entity is used somewhere.", unrefShown: "Showing {shown} of {total} – filter by domain to see more.", allDomains: "All domains",
     noBatteries: "No battery entities found.", batteryLevel: "Level", integrationProblems: "Integrations with problems",
@@ -367,6 +367,7 @@ const ICONS = {
   entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
   label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline",
+  nodered_flow: "mdi:sitemap-outline",
 };
 
 const REMOVAL_KINDS = ["remove_entity", "remove_device", "forget_device"];
@@ -526,7 +527,7 @@ Object.assign(TEXT.de, {
   reason_target_missing: "Die neue Entität existiert nicht.", reason_same_entity: "Alte und neue Entität sind identisch.", reason_different_domain: "Alte und neue Entität haben unterschiedliche Typen.", reason_target_not_working: "Die neue Entität funktioniert noch nicht.",
   reason_nothing_to_replace: "Nichts, was Housekeeper sicher umschreiben kann.", reason_source_manual: "Nicht alles lässt sich automatisch ersetzen: Templates und nicht bearbeitbare Quellen musst du von Hand anpassen.",
   reason_energy_changes: "Ändert das Energie-Dashboard; die Statistik der neuen Entität beginnt neu.", reason_config_rewrite: "Schreibt Konfiguration um (in YAML-Dateien gehen Kommentare verloren).", reason_unit_differs: "Die Einheiten unterscheiden sich.", reason_class_differs: "Die Geräteklassen unterscheiden sich.",
-  source_not_in_yaml: "nicht in der YAML-Datei gefunden (anderswo definiert)", source_yaml_uses_tags: "YAML nutzt !secret oder !include", source_yaml_mode: "YAML-Dashboard", source_not_editable: "nicht bearbeitbar",
+  source_not_in_yaml: "nicht in der YAML-Datei gefunden (anderswo definiert)", source_yaml_uses_tags: "YAML nutzt !secret oder !include", source_yaml_mode: "YAML-Dashboard", source_not_editable: "nicht bearbeitbar", source_nodered: "Node-RED-Flow, dort von Hand anpassen",
   abort_device_gone: "Das Gerät existiert nicht mehr.", abort_device_unsupported: "Dieses Gerät (Untergerät) kann nicht bereinigt werden.", reason_child_device: "Untergeräte lassen sich noch nicht entfernen oder wiederherstellen.", abort_device_changed: "Das Gerät wurde nach der Vorschau geändert.", abort_source_changed: "Eine Konfiguration wurde nach der Vorschau geändert.", abort_rejected_by_integration: "Die Integration hat das Entfernen abgelehnt.",
   abort_integration_no_support: "Die Integration unterstützt das Entfernen nicht.", abort_source_write_failed: "Eine Konfiguration konnte nicht geschrieben werden; bereits geänderte Teile wurden zurückgesetzt.", abort_rollback_incomplete: "Eine Konfiguration wurde geändert und konnte nicht zurückgesetzt werden. Bitte unter „Rückgängig“ erneut versuchen oder das Backup verwenden.",
   check_device_disabled: "Gerät ist deaktiviert", check_device_removed: "Gerät ist entfernt", check_not_recurring: "Das Gerät kam nicht wieder", check_references_replaced: "Keine sicheren Verweise auf die alte Entität mehr",
@@ -559,7 +560,7 @@ Object.assign(TEXT.en, {
   reason_target_missing: "The new entity does not exist.", reason_same_entity: "Old and new entity are the same.", reason_different_domain: "Old and new entity are of different types.", reason_target_not_working: "The new entity does not work yet.",
   reason_nothing_to_replace: "Nothing Housekeeper can safely rewrite.", reason_source_manual: "Not everything can be replaced automatically: you have to adjust templates and sources that cannot be edited by hand.",
   reason_energy_changes: "Changes the Energy dashboard; the new entity's statistics start fresh.", reason_config_rewrite: "Rewrites configuration (comments in YAML files are lost).", reason_unit_differs: "The units differ.", reason_class_differs: "The device classes differ.",
-  source_not_in_yaml: "not found in the YAML file (defined elsewhere)", source_yaml_uses_tags: "YAML uses !secret or !include", source_yaml_mode: "YAML dashboard", source_not_editable: "not editable",
+  source_not_in_yaml: "not found in the YAML file (defined elsewhere)", source_yaml_uses_tags: "YAML uses !secret or !include", source_yaml_mode: "YAML dashboard", source_not_editable: "not editable", source_nodered: "Node-RED flow, adjust it there by hand",
   abort_device_gone: "The device no longer exists.", abort_device_unsupported: "This device (a child device) cannot be cleaned up.", reason_child_device: "Child devices cannot be removed or restored yet.", abort_device_changed: "The device was changed after the preview.", abort_source_changed: "A configuration was changed after the preview.", abort_rejected_by_integration: "The integration rejected the removal.",
   abort_integration_no_support: "The integration does not support removal.", abort_source_write_failed: "A configuration could not be written; parts already changed were put back.", abort_rollback_incomplete: "A configuration was changed and could not be put back. Try Undo again or use the backup.",
   check_device_disabled: "Device is disabled", check_device_removed: "Device is removed", check_not_recurring: "The device did not come back", check_references_replaced: "No certain references to the old entity remain",
@@ -1909,9 +1910,9 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
-      ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.integrationProblems()}</div>
+      ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.noderedProblem()}${this.integrationProblems()}</div>
       <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
-      <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
+      <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "nodered_flow", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
   }
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
@@ -1974,6 +1975,14 @@ class OverviewMixin {
     ];
     const rows = items.map(([label, icon, view, count, filter]) => `<button class="row" data-jump="${view}"${label === "unreferenced" ? ' data-jump-tab="unused"' : ""}${filter !== undefined && view === "findingsNav" ? ` data-filter="${filter}"` : ""}><span class="tile ${count ? "warn" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(label)}</strong></span><span class="pill ${count ? "warn" : "mute"}">${this.formatNumber(count)}</span></button>`).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("hintsTitle")}</h2><p>${this.t("cleanupHint")}</p></div></div>${rows}</div>`;
+  }
+
+  // Node-RED was configured but could not be read: its uses are missing or from an older read.
+  noderedProblem() {
+    const nr = this.data.meta.nodered;
+    if (!nr?.configured || !nr.error) return "";
+    const text = nr.cached ? this.t("noderedCached", { date: this.formatDate(nr.read_at) }) : this.t("noderedMissing");
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("noderedUnreachable")}</h2><p>${this.esc(text)} ${this.esc(this.t(`nodered_${nr.error}`))}</p></div></div></div>`;
   }
 
   integrationProblems() {
@@ -4008,7 +4017,7 @@ class DiagnosisMixin {
       const helperBroken = this.data.findings.filter(f => f.rule_id === "config_entry.missing_entity" && f.object_id === item.object_id);
       helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
       if (helperBroken.length) { cause = t("cause_helper_broken", { count: helperBroken.length }); hint = t("hint_helper_broken"); tone = "red"; }
-    } else if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) {
+    } else if (["automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) {
       const key = this.objectKey(item);
       const broken = this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_"));
       broken.forEach(f => rows.push(this.check(t(f.rule_id.split(".")[1]), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
@@ -4041,7 +4050,7 @@ class DiagnosisMixin {
 
   // Read-only what-if: which automations would lose a reference if this object (and what it owns) were removed.
   impact(item, key) {
-    if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) return null;
+    if (["automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) return null;
     const OWNED = ["PROVIDES", "OWNS"], USAGE = USAGE_RELATIONS;
     const scope = new Set([key]);
     for (const member of scope) { // grows while iterating: what the object owns, and what that owns
@@ -4053,7 +4062,7 @@ class DiagnosisMixin {
     for (const member of scope) used.push(...this.edgesTo(member));
     used.sort((a, b) => order.get(a) - order.get(b)); // the order of the edges as scanned
     for (const e of used) {
-      if (!USAGE.includes(e.relation) || !scope.has(e.target) || scope.has(e.source) || !(/^(automation|script|scene|dashboard|config_entry):/.test(e.source) || e.relation === "INCLUDES")) continue;
+      if (!USAGE.includes(e.relation) || !scope.has(e.target) || scope.has(e.source) || !(/^(automation|script|scene|dashboard|config_entry|nodered_flow):/.test(e.source) || e.relation === "INCLUDES")) continue;
       const hit = byAutomation.get(e.source) || { key: e.source, certain: false, places: [] };
       if (e.confidence === "certain") hit.certain = true;
       if (e.location && e.location !== "runtime_extraction") hit.places.push(e.location);
@@ -4103,7 +4112,7 @@ class DiagnosisMixin {
     const min = this.data.meta.min_unavailable_days || 0;
     const facts = [];
     if (item.status_since) facts.push([this.t("since"), `${this.formatDate(item.status_since)}<small>${this.esc(this.relTime(item.status_since))} · ${this.t("firstSeenNote")}</small>`]);
-    if (["entity", "automation", "script", "scene", "dashboard"].includes(item.object_type)) {
+    if (["entity", "automation", "script", "scene", "dashboard", "nodered_flow"].includes(item.object_type)) {
       facts.push([this.t("finding"), finding ? `${this.pill(finding.classification)}<small>${this.t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : this.t("noFinding")]);
     }
     const quarantined = ["entity", "device"].includes(item.object_type) ? this.quarantineOf(item.object_id) : null;
@@ -4215,7 +4224,7 @@ class DiagnosisMixin {
     const tablist = tabs.map(([id, label, count]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
-      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
+      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}${/^https?:\/\//.test(item.editor_url || "") ? `<a class="btn" href="${this.esc(item.editor_url)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInNodeRed")}</a>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
       <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${this.detailPanel(tab, item, key)}</div>`;
@@ -10454,6 +10463,18 @@ class ConfirmMixin {
     if (this._confirmFocus) { this._confirmFocus = false; modal.querySelector("[data-confirm-no]")?.focus(); }
   }
 }
+
+// Node-RED: flows read from the Node-RED admin API count as users of entities and devices.
+Object.assign(TEXT.de, {
+  openInNodeRed: "In Node-RED öffnen", noderedUnreachable: "Node-RED nicht lesbar",
+  noderedCached: "Verwendet werden die Flows vom {date}.", noderedMissing: "Was Node-RED nutzt, fehlt in diesem Scan; Entitäten und Geräte können deshalb als unbenutzt erscheinen.",
+  nodered_cannot_connect: "Node-RED ist nicht erreichbar.", nodered_invalid_auth: "Node-RED hat die Anmeldung abgelehnt.", nodered_invalid_response: "Die Adresse antwortet nicht mit Node-RED-Flows.",
+});
+Object.assign(TEXT.en, {
+  openInNodeRed: "Open in Node-RED", noderedUnreachable: "Node-RED not readable",
+  noderedCached: "Using the flows read on {date}.", noderedMissing: "What Node-RED uses is missing from this scan, so entities and devices may look unused.",
+  nodered_cannot_connect: "Node-RED cannot be reached.", nodered_invalid_auth: "Node-RED rejected the login.", nodered_invalid_response: "The address does not answer with Node-RED flows.",
+});
 
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {

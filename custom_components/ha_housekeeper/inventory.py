@@ -18,6 +18,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import floor_registry as fr
 from homeassistant.helpers import label_registry as lr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.storage import Store
 from homeassistant.loader import IntegrationNotFound, async_get_integration, async_get_integrations
 
 from . import followup
@@ -41,8 +42,10 @@ from .const import (
     DEFAULT_UNUSED_AUTOMATION_DAYS,
     DOMAIN,
     IGNORE_LABEL,
+    NODERED_STORAGE_KEY,
     QUARANTINE_DAYS,
     SIGNAL_SCAN_COMPLETE,
+    STORAGE_VERSION,
     WARMUP_SECONDS,
 )
 from .coverage import CoverageStore
@@ -74,6 +77,8 @@ from .impact import apply_impact
 from .issues import async_sync_issues
 from .maintenance import PreflightStore
 from .marks import MarkStore, apply_marks, mark_key
+from .nodered import OBJECT_TYPE as NODERED_TYPE
+from .nodered import NodeRedError, analyze_flows, async_fetch_flows, device_serials
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
 from .observations import ObservationStore
@@ -105,6 +110,10 @@ ENERGY_KEYS = frozenset(
         "entity_energy_price_export",
     }
 )
+
+
+# Node-RED node fields that only matter to the editor; left out of the stored copy of the flows.
+NODERED_DROP = frozenset({"x", "y", "w", "h", "wires", "info", "outputLabels", "icon", "l"})
 
 
 def _iso(value: Any) -> str | None:
@@ -556,6 +565,13 @@ class InventoryScanner:
         self.stale_hours = DEFAULT_STALE_HOURS
         self.scan_interval_hours = DEFAULT_SCAN_INTERVAL_HOURS
         self.version: str | None = None
+        # Node-RED admin API: url, username, password, token. None when not configured.
+        self.nodered: dict[str, str] | None = None
+        # The last flows read, kept so an unreachable Node-RED does not make its uses vanish.
+        self._nodered_store: Store[dict[str, Any]] = Store(
+            hass, STORAGE_VERSION, NODERED_STORAGE_KEY
+        )
+        self._nodered_flows: dict[str, Any] | None = None
         self.status: dict[str, Any] = {
             "running": False,
             "phase": "idle",
@@ -593,6 +609,7 @@ class InventoryScanner:
         await self.window.async_load()
         await self.notify.async_load()
         await self.runs.async_load()
+        self._nodered_flows = await self._nodered_store.async_load()
 
     def begin_boot(self) -> None:
         """Home Assistant is still booting: scans are preliminary until the warm-up is over."""
@@ -799,6 +816,9 @@ class InventoryScanner:
         dashboards.extend(energy)
         dashboard_edges.extend(energy_edges)
         helper_edges, helper_findings = self._helper_inventory(existing_objects)
+        flows, flow_edges, flow_findings, nodered_status = await self._nodered_inventory(
+            existing_objects, device_entries, preliminary
+        )
         group_edges, group_findings = self._group_inventory(existing_objects)
         known_automation_ids = {item["object_id"] for item in automations}
         automations.extend(
@@ -842,9 +862,18 @@ class InventoryScanner:
             + dashboard_edges
             + helper_edges
             + group_edges
+            + flow_edges
         )
         objects = (
-            entities + devices + integrations + areas + floors + labels + automations + dashboards
+            entities
+            + devices
+            + integrations
+            + areas
+            + floors
+            + labels
+            + automations
+            + dashboards
+            + flows
         )
         findings = (
             _entity_findings(entities, observed_at, self.min_unavailable_days)
@@ -865,6 +894,7 @@ class InventoryScanner:
             + dashboard_findings
             + helper_findings
             + group_findings
+            + flow_findings
         )
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])
@@ -926,6 +956,7 @@ class InventoryScanner:
                 "recurring_devices": len(recurring),
                 "quarantine_days": QUARANTINE_DAYS,
                 "ha_version": HA_VERSION,
+                "nodered": nodered_status,
                 "scan_interval_hours": self.scan_interval_hours,
                 "low_battery_percent": self.low_battery_percent,
                 "stale_hours": self.stale_hours,
@@ -1304,6 +1335,87 @@ class InventoryScanner:
                     }
                 )
         return edges, findings
+
+    async def _nodered_inventory(
+        self, existing: dict[str, set[str]], devices: list[Any], preliminary: bool
+    ) -> tuple[list[dict[str, Any]], list[dict[str, str]], list[dict[str, Any]], dict[str, Any]]:
+        """Describe Node-RED flows through the entities and devices they use.
+
+        Falls back to the flows of the last successful read when Node-RED cannot be reached, so
+        an outage never makes its uses vanish (and cleanup suggest what Node-RED still needs).
+        """
+        config = self.nodered
+        if not config or not config.get("url"):
+            return [], [], [], {"configured": False}
+        url = config["url"]
+        status: dict[str, Any] = {"configured": True, "error": None, "cached": False}
+        cache = self._nodered_flows if (self._nodered_flows or {}).get("url") == url else None
+        try:
+            flows = await async_fetch_flows(
+                self.hass, url, config.get("username"), config.get("password"), config.get("token")
+            )
+        except NodeRedError as err:
+            status["error"] = str(err)
+            if cache is None:
+                return [], [], [], status
+            flows = cache["flows"]
+            status.update(cached=True, read_at=cache.get("read_at"))
+        else:
+            read_at = datetime.now(UTC).isoformat()
+            status["read_at"] = read_at
+            trimmed = [
+                {key: value for key, value in node.items() if key not in NODERED_DROP}
+                for node in flows
+            ]
+            if not preliminary and (cache is None or cache.get("flows") != trimmed):
+                self._nodered_flows = {"url": url, "read_at": read_at, "flows": trimmed}
+                cached = self._nodered_flows
+                self._nodered_store.async_delay_save(lambda: cached, 1)
+        analyzed = await self.hass.async_add_executor_job(
+            analyze_flows, flows, existing, device_serials(devices)
+        )
+        items: list[dict[str, Any]] = []
+        edges: list[dict[str, str]] = []
+        findings: list[dict[str, Any]] = []
+        for flow in analyzed:
+            source = f"{NODERED_TYPE}:{flow['id']}"
+            references = flow["references"]
+            edges.extend(
+                {
+                    "source": source,
+                    "target": f"{reference['kind']}:{reference['object_id']}",
+                    "relation": reference["relation"],
+                    "confidence": reference["confidence"],
+                    "location": reference["location"],
+                }
+                for reference in references
+            )
+            # Only fields that name an object can be missing; text matches exist by construction.
+            missing = missing_references(
+                [r for r in references if r["confidence"] == "certain"], existing
+            )
+            findings.extend(_missing_findings(NODERED_TYPE, flow["id"], missing))
+            items.append(
+                {
+                    "object_type": NODERED_TYPE,
+                    "object_id": flow["id"],
+                    "name": flow["name"],
+                    "status": "active",
+                    "flow_kind": flow["kind"],
+                    "node_count": flow["node_count"],
+                    "entity_count": len(
+                        {r["object_id"] for r in references if r["kind"] == "entity"}
+                    ),
+                    "device_count": len(
+                        {r["object_id"] for r in references if r["kind"] == "device"}
+                    ),
+                    "missing_reference_count": len(missing),
+                    "editor_url": f"{url.rstrip('/')}/#flow/{flow['id']}",
+                    "references": references,
+                }
+            )
+        status["flow_count"] = len(items)
+        return items, edges, findings, status
 
     async def _statistics(self) -> list[dict[str, Any]]:
         """Long-term statistics known to the recorder; empty without a recorder."""

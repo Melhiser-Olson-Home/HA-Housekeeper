@@ -27,6 +27,10 @@ from .const import (
     CONF_HISTORY_DAYS,
     CONF_LOW_BATTERY_PERCENT,
     CONF_MIN_UNAVAILABLE_DAYS,
+    CONF_NODERED_PASSWORD,
+    CONF_NODERED_TOKEN,
+    CONF_NODERED_URL,
+    CONF_NODERED_USERNAME,
     CONF_SCAN_INTERVAL_HOURS,
     CONF_STALE_HOURS,
     CONF_UNUSED_AUTOMATION_DAYS,
@@ -96,6 +100,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_SCAN_INTERVAL_HOURS, DEFAULT_SCAN_INTERVAL_HOURS
     )
     scanner.history.retention_days = entry.options.get(CONF_HISTORY_DAYS, DEFAULT_HISTORY_DAYS)
+    if entry.options.get(CONF_NODERED_URL):
+        scanner.nodered = {
+            "url": entry.options[CONF_NODERED_URL],
+            "username": entry.options.get(CONF_NODERED_USERNAME, ""),
+            "password": entry.options.get(CONF_NODERED_PASSWORD, ""),
+            "token": entry.options.get(CONF_NODERED_TOKEN, ""),
+        }
     await scanner.async_initialize()
     hass.data[DOMAIN]["scanner"] = scanner
 
