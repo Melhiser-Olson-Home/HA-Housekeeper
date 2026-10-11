@@ -41,11 +41,12 @@ def test_manifest_version_matches_latest_changelog_entry() -> None:
     assert match.group(1) == manifest["version"]
 
 
-def test_manifest_points_to_the_owner_repository() -> None:
+def test_manifest_points_to_the_fork_repository() -> None:
+    """Issues about the fork go to the fork; upstream credit stays in LICENSE and README."""
     manifest = _json(COMPONENT / "manifest.json")
-    assert manifest["codeowners"] == ["@bertel2020"]
-    assert manifest["documentation"].startswith("https://github.com/bertel2020/")
-    assert manifest["issue_tracker"].startswith("https://github.com/bertel2020/")
+    assert manifest["codeowners"] == ["@wnmelhiser"]
+    assert manifest["documentation"].startswith("https://github.com/Melhiser-Olson-Home/")
+    assert manifest["issue_tracker"].startswith("https://github.com/Melhiser-Olson-Home/")
 
 
 def test_german_and_english_translation_keys_match() -> None:

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/bertel2020/HA-Housekeeper/main/custom_components/ha_housekeeper/brand/logo.png" alt="HA Housekeeper" width="160">
+  <img src="https://raw.githubusercontent.com/Melhiser-Olson-Home/HA-Housekeeper/main/custom_components/ha_housekeeper/brand/logo.png" alt="HA Housekeeper" width="160">
 </p>
 
 <h1 align="center">HA Housekeeper</h1>
@@ -11,9 +11,9 @@
 <p align="center">
   <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg" alt="HACS Custom"></a>
   <a href="https://www.home-assistant.io/"><img src="https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-18BCF2.svg?logo=home-assistant&logoColor=white" alt="Home Assistant"></a>
-  <a href="https://github.com/bertel2020/HA-Housekeeper/releases"><img src="https://img.shields.io/github/v/release/bertel2020/HA-Housekeeper?sort=semver&include_prereleases" alt="Release"></a>
-  <a href="https://github.com/bertel2020/HA-Housekeeper/actions/workflows/validate.yml"><img src="https://github.com/bertel2020/HA-Housekeeper/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/bertel2020/HA-Housekeeper" alt="License"></a>
+  <a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/releases"><img src="https://img.shields.io/github/v/release/Melhiser-Olson-Home/HA-Housekeeper?sort=semver&include_prereleases" alt="Release"></a>
+  <a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/actions/workflows/validate.yml"><img src="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Melhiser-Olson-Home/HA-Housekeeper" alt="License"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,9 @@
   <a href="https://paypal.me/RobertoMartins"><img src="https://img.shields.io/badge/PayPal-donate-00457C?logo=paypal&logoColor=white" alt="PayPal"></a>
 </p>
 
-<p align="center"><em><a href="https://github.com/bertel2020/HA-Housekeeper/blob/main/README.de.md">Deutsche Version</a></em></p>
+<p align="center"><em><a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/blob/main/README.de.md">Deutsche Version</a></em></p>
+
+> **This is a fork** of [bertel2020/HA-Housekeeper](https://github.com/bertel2020/HA-Housekeeper) by Roberto (bertel2020), maintained by Melhiser-Olson-Home. It adds **[Node-RED flows](#node-red-flows)**: entities and devices your flows use count as used, so cleanup does not suggest disabling them. Fork releases carry a fourth version number on top of the upstream version they are based on (for example `1.3.0.1` is based on `1.3.0`). Please report problems with this fork [here](https://github.com/Melhiser-Olson-Home/HA-Housekeeper/issues), not upstream. The donation links above support the original author.
 
 HA Housekeeper is a maintenance and analysis integration for Home Assistant. It creates a clear inventory of your installation, explains suspicious or orphaned objects, and shows how entities, devices, integrations, areas, and automations depend on each other.
 
@@ -85,7 +87,7 @@ Housekeeper combines registry data and the live Home Assistant runtime to provid
 
 ### Via HACS (recommended)
 
-[![Open the HACS repository in My Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bertel2020&repository=HA-Housekeeper&category=integration)
+[![Open the HACS repository in My Home Assistant](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Melhiser-Olson-Home&repository=HA-Housekeeper&category=integration)
 [![Add HA Housekeeper to My Home Assistant](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=ha_housekeeper)
 
 1. Use the first button to open the Housekeeper repository in HACS.
@@ -97,12 +99,12 @@ Housekeeper combines registry data and the live Home Assistant runtime to provid
 4. Then open **Housekeeper** in the sidebar while signed in as an administrator.
 
 If the first button does not work, add
-`https://github.com/bertel2020/HA-Housekeeper` in HACS under **Integrations →
+`https://github.com/Melhiser-Olson-Home/HA-Housekeeper` in HACS under **Integrations →
 Custom repositories** with the category **Integration**.
 
-While Housekeeper is not yet visible in the default HACS search, the first button
-registers it as a custom repository. The status of its inclusion is tracked in
-[hacs/default#11766](https://github.com/hacs/default/pull/11766).
+This fork is not in the default HACS store, so the first button registers it as a
+custom repository. The HA Housekeeper in the default store is the original version,
+without Node-RED support.
 
 ### Manual
 
@@ -234,6 +236,7 @@ Automations built in Node-RED live outside Home Assistant, so on their own they 
 - Entity IDs in templates, function code and switch or change rules are **probable**. So are device IDs and **device serial numbers** found there. Event-driven flows (for example Lutron Pico remotes matched by serial from `lutron_caseta_button_event`) then mark the *device* as possibly used, so disabling or removing it shows a warning. The device's own entities are judged by their own links, so unused ones remain candidates.
 - If Node-RED cannot be reached, the scan uses the flows from the last successful read and the overview says so. That way an outage never makes Node-RED's uses vanish.
 - Replacing references and renaming list Node-RED flows as places to adjust by hand.
+- **Entities Node-RED creates** (through the Node-RED Companion integration) are matched to the flow whose node creates them. Inputs the flow reacts to (buttons, switches, numbers, selects, text, and the "expose as" switches) count as used, for certain. Sensors and binary sensors the flow only writes to are linked but still count as unused if nothing reads them. If the node behind such an entity no longer exists in any flow, Housekeeper reports the entity as left behind. It does this only after a fresh read, and only for a Node-RED server found in the flows.
 
 ### Dependency explorer
 

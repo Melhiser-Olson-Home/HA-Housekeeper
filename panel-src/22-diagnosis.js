@@ -70,6 +70,11 @@ class DiagnosisMixin {
       else if (item.reason === "state_missing" && broken) hint = t("hint_integration");
       else if (["state_missing", "device_missing", "config_entry_missing"].includes(item.reason)) hint = t("hint_orphan");
       if (item.duplicate_of) hint = t("hint_duplicate");
+      const noderedGone = this.data.findings.find(f => f.rule_id === "entity.nodered_node_missing" && f.object_id === item.object_id);
+      if (noderedGone) {
+        rows.push(this.check(t("nodered_node_missing"), "red", noderedGone.evidence?.[0]?.location || "", t("missing")));
+        cause = t("cause_nodered_node_missing"); hint = t("hint_nodered_node_missing"); tone = "red";
+      }
       if (stable?.info) {
         cause = `${t("cause_unstable", { level: t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable") })} ${cause}`;
         if (tone === "ok") tone = stable.info.level === "flapping" ? "red" : "warn";
