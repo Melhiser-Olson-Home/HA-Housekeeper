@@ -30,13 +30,13 @@ def test_manifest_declares_installable_custom_integration() -> None:
     assert manifest["domain"] == "ha_housekeeper"
     assert manifest["config_flow"] is True
     assert manifest["single_config_entry"] is True
-    assert re.fullmatch(r"\d+\.\d+\.\d+", manifest["version"])
+    assert re.fullmatch(r"\d+\.\d+\.\d+(\.\d+)?", manifest["version"])  # 4th: fork release
 
 
 def test_manifest_version_matches_latest_changelog_entry() -> None:
     manifest = _json(COMPONENT / "manifest.json")
     changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-    match = re.search(r"^## (\d+\.\d+\.\d+)", changelog, re.MULTILINE)
+    match = re.search(r"^## (\d+\.\d+\.\d+(?:\.\d+)?) ", changelog, re.MULTILINE)
     assert match is not None
     assert match.group(1) == manifest["version"]
 

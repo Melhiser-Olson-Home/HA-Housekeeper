@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.3.0.1 - 2026-10-11
+
+Fork-Release (Melhiser-Olson-Home) auf Basis von 1.3.0. Die vierte Stelle zählt die eigenen Releases auf einer Upstream-Version.
 
 ### Neu
 

@@ -34,6 +34,13 @@ from .const import (
 from .nodered import NodeRedError, async_fetch_flows
 from .writelock import write_holder
 
+# Example addresses for the setup help; translations may not contain URLs themselves.
+NODERED_EXAMPLES = {
+    "url_example": "http://192.168.1.10:1880",
+    "admin_example": "http://192.168.1.10:1880/admin",
+    "addon_pattern": "http://HA-ADDRESS:PORT",
+    "addon_example": "http://homeassistant.local:1880",
+}
 NODERED_SECTION = "nodered"  # the form groups the connection; the options stay flat
 NODERED_FIELDS = (
     (CONF_NODERED_URL, TextSelectorType.URL),
@@ -103,7 +110,12 @@ class HAHousekeeperOptionsFlow(OptionsFlow):
                 ]
             )
         )
-        return self.async_show_form(step_id="init", data_schema=schema, errors=errors)
+        return self.async_show_form(
+            step_id="init",
+            data_schema=schema,
+            errors=errors,
+            description_placeholders=NODERED_EXAMPLES,
+        )
 
 
 class HAHousekeeperConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
