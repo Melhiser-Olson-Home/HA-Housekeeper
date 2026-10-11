@@ -27,7 +27,7 @@
         "sections": {
           "nodered": {
             "name": "Node-RED (optional)",
-            "description": "Damit sieht Housekeeper, welche Entitäten und Geräte deine Node-RED-Flows nutzen, und schlägt nicht vor, sie zu deaktivieren. Die Flows werden nur gelesen und nie geändert. Beim Speichern prüft Housekeeper die Verbindung.\n\n**Eigenständiges Node-RED oder Docker:** Nimm die Adresse, unter der du den Editor öffnest. Verlangt der Editor eine Anmeldung, trage diesen Benutzer ein (Lesezugriff genügt).\n\n**Node-RED-Add-on von Home Assistant:** Öffne das Add-on, gehe zu **Konfiguration → Netzwerk** und gib Port `1880/tcp` eine Portnummer. Nimm dann `http://<Adresse deines Home Assistant>:<Port>` und melde dich mit einem Home-Assistant-Benutzer an.",
+            "description": "Damit sieht Housekeeper, welche Entitäten und Geräte deine Node-RED-Flows nutzen, und schlägt nicht vor, sie zu deaktivieren. Die Flows werden nur gelesen und nie geändert. Beim Speichern prüft Housekeeper die Verbindung.\n\n**Eigenständiges Node-RED oder Docker:** Nimm die Adresse, unter der du den Editor öffnest. Verlangt der Editor eine Anmeldung, trage diesen Benutzer ein (Lesezugriff genügt).\n\n**Node-RED-Add-on von Home Assistant:** Öffne das Add-on, gehe zu **Konfiguration → Netzwerk** und gib Port `1880/tcp` eine Portnummer. Nimm dann `http://HA-ADRESSE:PORT` (z. B. `http://homeassistant.local:1880`) und melde dich mit einem Home-Assistant-Benutzer an.",
             "data": {
               "nodered_url": "Node-RED-Adresse",
               "nodered_username": "Benutzername",
