@@ -229,7 +229,7 @@ The **Changes** view compares the current state with the previous scan or with t
 
 ### Node-RED flows
 
-Automations built in Node-RED live outside Home Assistant, so on their own they would leave entities and devices looking unused. Enter the Node-RED address under **Settings → Devices & services → HA Housekeeper → Configure** (plus a username and password, or an access token, if the editor needs a login). Housekeeper then reads the flows through the Node-RED admin API with a read-only token on every scan. It never writes to Node-RED.
+Automations built in Node-RED live outside Home Assistant, so on their own they would leave entities and devices looking unused. Enter the Node-RED address in the Housekeeper panel under **Settings → Node-RED** (plus a username and password, or an access token, if the editor needs a login). **Configure** on the integration opens the same page. Saving tests the connection first. Housekeeper then reads the flows through the Node-RED admin API with a read-only token on every scan. It never writes to Node-RED.
 
 - Every enabled flow tab and subflow becomes a **Node-RED flow** object. Its enabled nodes link to what they use, like an automation's links do. Cleanup, *Not used*, impact and the dependency view all take them into account.
 - Fields of Home Assistant nodes (`api-call-service`, `trigger-state`, `server-state-changed`, `poll-state`, `api-current-state`, …) that name an entity, device, area, floor or label are **certain**. A Node-RED flow that names an entity that no longer exists produces a *missing reference* finding.

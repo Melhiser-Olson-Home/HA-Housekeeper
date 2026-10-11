@@ -335,3 +335,49 @@ async def test_scan_links_created_entities_and_flags_leftovers(hass: HomeAssista
         snapshot = await scanner.async_scan()
     assert not [f for f in snapshot["findings"] if f["rule_id"] == "entity.nodered_node_missing"]
     assert relation(button) == ["TRIGGERS_ON"]
+
+
+async def test_panel_saves_the_connection_and_never_returns_secrets(
+    hass: HomeAssistant, hass_ws_client
+) -> None:
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+    from test_homeassistant_runtime import _ws_setup
+
+    from custom_components.ha_housekeeper.const import DOMAIN
+
+    entry = MockConfigEntry(
+        domain=DOMAIN, data={}, options={"min_unavailable_days": 7, "nodered_password": "old"}
+    )
+    entry.add_to_hass(hass)
+    _, client = await _ws_setup(hass, hass_ws_client)
+    check = "custom_components.ha_housekeeper.ws_nodered.async_fetch_flows"
+
+    async def ask(**msg):
+        await client.send_json_auto_id(msg)
+        return await client.receive_json()
+
+    reply = await ask(type="ha_housekeeper/nodered_get")
+    assert reply["result"] == {"url": "", "username": "", "has_password": True, "has_token": False}
+
+    with patch(check, side_effect=NodeRedError("invalid_auth")):
+        reply = await ask(type="ha_housekeeper/nodered_set", url="http://nr:1880", username="wes")
+    assert reply["error"]["code"] == "nodered_invalid_auth"
+    assert "nodered_url" not in entry.options  # nothing saved on a failed test
+
+    reply = await ask(type="ha_housekeeper/nodered_set", url="nr:1880")
+    assert reply["error"]["code"] == "nodered_invalid_url"
+
+    flows = [tab("t1", "A"), tab("t2", "B")]
+    with patch(check, return_value=flows) as fetch:
+        reply = await ask(type="ha_housekeeper/nodered_set", url="http://nr:1880", username="wes")
+    fetch.assert_awaited_once()
+    assert fetch.await_args.args[1:] == ("http://nr:1880", "wes", "old", "")  # kept password
+    assert reply["result"]["tabs"] == 2 and reply["result"]["has_password"] is True
+    assert "old" not in str(reply)
+    assert entry.options["nodered_url"] == "http://nr:1880"
+    assert entry.options["nodered_password"] == "old" and entry.options["min_unavailable_days"] == 7
+
+    reply = await ask(type="ha_housekeeper/nodered_set", disconnect=True)
+    assert reply["result"]["url"] == ""
+    assert not any(key.startswith("nodered_") for key in entry.options)
+    assert entry.options["min_unavailable_days"] == 7

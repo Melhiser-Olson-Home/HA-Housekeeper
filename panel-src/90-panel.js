@@ -917,6 +917,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
     root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlan", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });
     root.querySelector("[data-opts-save]")?.addEventListener("click", () => this.saveOptions());
+    root.querySelector("[data-nr-save]")?.addEventListener("click", () => this.saveNodeRed(false));
+    root.querySelector("[data-nr-disconnect]")?.addEventListener("click", () => this.confirmAsk(this.t("nrDisconnect") + "?", () => this.saveNodeRed(true)));
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
     const optInputs = [...root.querySelectorAll("[data-opt]")];
     optInputs.forEach(el => el.oninput = () => {
@@ -924,7 +926,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (save) save.disabled = !optInputs.some(input => input.value !== input.dataset.saved);
     });
     root.querySelectorAll("[data-set-tab]").forEach(el => {
-      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.render(); };
+      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.nrMessage = ""; this.render(); };
       el.onkeydown = ev => {
         const ids = [...root.querySelectorAll("[data-set-tab]")].map(b => b.dataset.setTab), at = ids.indexOf(el.dataset.setTab);
         const next = { ArrowRight: ids[(at + 1) % ids.length], ArrowLeft: ids[(at - 1 + ids.length) % ids.length], Home: ids[0], End: ids[ids.length - 1] }[ev.key];
