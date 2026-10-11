@@ -18,6 +18,7 @@ from . import (
     rename,
     ws_automations,
     ws_care,
+    ws_nodered,
     ws_recorder,
 )
 from . import refactor as refactor_module
@@ -1080,6 +1081,7 @@ def async_register(hass: HomeAssistant) -> None:
     ws_automations.async_register(hass)
     ws_care.async_register(hass)
     ws_recorder.async_register(hass)
+    ws_nodered.async_register(hass)
     websocket_api.async_register_command(hass, websocket_inventory)
     websocket_api.async_register_command(hass, websocket_scan)
     websocket_api.async_register_command(hass, websocket_status)

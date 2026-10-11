@@ -3902,3 +3902,27 @@ test("battery sensors that are no replaceable battery leave the list, wait in a 
   await el.batterySetKinds([{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }]);
   assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/battery_kind_set", items: [{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }] }));
 });
+
+test("Node-RED settings show the connection without its secrets and send only what changed", async () => {
+  const calls = [];
+  const { el } = panel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, nodered: { configured: true, error: null, cached: false, read_at: "2026-10-11T15:00:00+00:00", flow_count: 17 } } };
+  el.nrConfig = { url: "http://nr:1880", username: "wes", has_password: true, has_token: false };
+  const html = el.noderedCard();
+  assert.ok(html.includes('value="http://nr:1880"') && html.includes('value="wes"'));
+  assert.ok(html.includes('placeholder="saved"'), "a saved password shows as saved");
+  assert.ok(html.includes("data-nr-disconnect"));
+  assert.equal(JSON.stringify(el.noderedPill()), JSON.stringify(["Connected", "ok"]));
+  el.data.meta.nodered = { configured: true, error: "cannot_connect", cached: true, read_at: "2026-10-11T15:00:00+00:00" };
+  assert.equal(JSON.stringify(el.noderedPill()), JSON.stringify(["Old flows", "warn"]));
+
+  // An empty password field keeps the saved password: it is not sent at all.
+  const inputs = [["url", "http://nr:1880"], ["username", "wes"], ["password", ""], ["token", ""]]
+    .map(([key, value]) => ({ dataset: { nr: key }, value }));
+  el.shadowRoot = { innerHTML: "", querySelectorAll: sel => (sel === "[data-nr]" ? inputs : []), querySelector: () => null };
+  el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { url: msg.url, username: msg.username, has_password: true, has_token: false, tabs: 17 }; } };
+  await el.saveNodeRed(false);
+  const sent = calls.filter(c => c.type === "ha_housekeeper/nodered_set");
+  assert.equal(JSON.stringify(sent), JSON.stringify([{ type: "ha_housekeeper/nodered_set", disconnect: false, url: "http://nr:1880", username: "wes" }]));
+  assert.equal(el.nrMessage, "Connected: 17 flows found. Housekeeper reloads and scans.");
+});

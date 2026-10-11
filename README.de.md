@@ -229,7 +229,7 @@ Die Ansicht **Änderungen** vergleicht den aktuellen Stand mit dem Scan davor od
 
 ### Node-RED-Flows
 
-In Node-RED gebaute Automationen liegen außerhalb von Home Assistant; ohne sie wirken dort genutzte Entitäten und Geräte unbenutzt. Trage unter **Einstellungen → Geräte & Dienste → HA Housekeeper → Konfigurieren** die Node-RED-Adresse ein (bei Bedarf Benutzername und Passwort oder ein Zugriffstoken). Housekeeper liest die Flows dann bei jedem Scan über die Node-RED-Admin-API mit einem Lese-Token und schreibt nie etwas nach Node-RED.
+In Node-RED gebaute Automationen liegen außerhalb von Home Assistant; ohne sie wirken dort genutzte Entitäten und Geräte unbenutzt. Trage im Housekeeper-Panel unter **Einstellungen → Node-RED** die Node-RED-Adresse ein (bei Bedarf Benutzername und Passwort oder ein Zugriffstoken); **Konfigurieren** an der Integration öffnet dieselbe Seite. Speichern prüft die Verbindung zuerst. Housekeeper liest die Flows dann bei jedem Scan über die Node-RED-Admin-API mit einem Lese-Token und schreibt nie etwas nach Node-RED.
 
 - Jeder aktive Flow-Tab und Subflow wird zum Objekt **Node-RED-Flow**; seine aktiven Knoten verweisen auf das, was sie nutzen. Aufräumen, *Nicht verwendet*, Auswirkung und Abhängigkeitsansicht berücksichtigen sie.
 - Felder der Home-Assistant-Knoten, die eine Entität, ein Gerät, einen Bereich, eine Etage oder ein Label nennen, sind **sicher**; fehlt das Ziel, gibt es einen Befund *fehlender Verweis*.

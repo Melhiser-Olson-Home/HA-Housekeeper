@@ -1359,6 +1359,7 @@ class StylesMixin {
       .xpclose{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
       button.ring{border:0;padding:0;cursor:pointer;color:inherit;font:inherit}button.ring:focus-visible{outline:2px solid var(--hk-blue);outline-offset:3px}.healthwhy{display:grid;gap:6px;max-width:560px;margin:-4px 0 14px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.healthwhy .row{display:flex;justify-content:space-between;gap:16px;padding:0;border:0;background:transparent}.healthwhy .row.minus{color:var(--hk-muted)}.healthwhy .row.total{border-top:1px solid var(--hk-border);padding-top:6px;font-weight:700}.healthwhy small{color:var(--hk-muted)}.healthwhy .btn{justify-self:start}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
+      .nrinput{width:100%;box-sizing:border-box}.nrhelp{padding:4px 16px 0;font-size:calc(13px*var(--hk-fs,1))}.nrhelp ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px;color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;
   }
@@ -2436,6 +2437,7 @@ class SettingsMixin {
       ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
       ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`safeMode_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
+      ["nodered", "mdi:sitemap-outline", "setTabNodeRed", "setHintNodeRed", ...this.noderedPill()],
       ["notify", "mdi:bell-outline", "setTabNotify", "setHintNotify", this.t(m.notify ? "setOn" : "setOff"), m.notify ? "ok" : "mute"],
       ["goals", "mdi:target", "setTabGoals", "setHintGoals", missed ? this.t("tilesMissed", { count: missed }) : "", "red"],
       ["hidden", "mdi:eye-off-outline", "setTabHidden", "setHintHidden", hidden ? this.formatNumber(hidden) : "", "mute"],
@@ -2559,7 +2561,7 @@ class SettingsMixin {
     const tabs = this.settingsTabs();
     const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
-    const body = { look: () => `<div class="grid2">${this.lookCard()}${this.behaviorCard()}</div>`, protection: () => this.protectionCard(), scan: () => `${this.scanCard()}${this.eventsCard()}`, notify: () => this.notifyCard(), goals: () => this.goalsCard(), hidden: () => this.hiddenCard(), info: () => this.infoCard() }[tab]();
+    const body = { look: () => `<div class="grid2">${this.lookCard()}${this.behaviorCard()}</div>`, protection: () => this.protectionCard(), scan: () => `${this.scanCard()}${this.eventsCard()}`, nodered: () => this.noderedCard(), notify: () => this.notifyCard(), goals: () => this.goalsCard(), hidden: () => this.hiddenCard(), info: () => this.infoCard() }[tab]();
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
@@ -10482,6 +10484,104 @@ Object.assign(TEXT.en, {
   nodered_node_missing: "Node-RED node deleted", cause_nodered_node_missing: "Node-RED created this entity for a node that no longer exists in any flow. It was left behind.", hint_nodered_node_missing: "If the node is no longer needed, the entity can be disabled and later removed.",
   nodered_cannot_connect: "Node-RED cannot be reached.", nodered_invalid_auth: "Node-RED rejected the login.", nodered_invalid_response: "The address does not answer with Node-RED flows.",
 });
+Object.assign(TEXT.de, {
+  setTabNodeRed: "Node-RED", setHintNodeRed: "Verbindung, damit in Flows Genutztes als verwendet gilt",
+  nrNotSet: "Nicht verbunden", nrConnected: "Verbunden", nrErrorPill: "Fehler", nrCachedPill: "Alte Flows",
+  nrIntro: "Housekeeper liest deine Flows (nur lesend) und zählt Entitäten und Geräte, die dort genutzt werden, als verwendet. So schlägt das Aufräumen nicht vor, sie zu deaktivieren.",
+  nrState: "Status", nrRead: "Zuletzt gelesen", nrFlows: "Flows",
+  nrHowTitle: "So findest du die Angaben",
+  nrStepStandalone: "Eigenständiges Node-RED oder Docker: die Adresse, unter der du den Editor öffnest, ohne das angehängte #flow/…. Verlangt der Editor eine Anmeldung, trage diesen Benutzer ein; Lesezugriff genügt.",
+  nrStepAddon: "Node-RED-Add-on von Home Assistant: im Add-on unter Konfiguration → Netzwerk dem Port 1880/tcp eine Portnummer geben, dann http://HA-ADRESSE:PORT eintragen und einen Home-Assistant-Benutzer verwenden.",
+  nrStepSave: "Speichern prüft die Verbindung zuerst. Danach lädt Housekeeper neu und scannt mit deinen Flows.",
+  nrUrl: "Adresse", nrUrlHint: "Mit http:// oder https://. Ist in settings.js httpAdminRoot gesetzt, diesen Pfad anhängen.",
+  nrUser: "Benutzername", nrUserHint: "Nur wenn der Editor eine Anmeldung verlangt.",
+  nrPassword: "Passwort", nrPasswordHint: "Leer lassen behält das gespeicherte Passwort.",
+  nrToken: "Zugriffstoken", nrTokenHint: "Statt Benutzername und Passwort, falls du ein Admin-Token hast. Leer lassen behält es.",
+  nrKept: "gespeichert", nrSave: "Prüfen und speichern", nrDisconnect: "Trennen",
+  nrTesting: "Verbindung wird geprüft …", nrDisconnecting: "Wird getrennt …", nrSaved: "Verbunden: {n} Flows gefunden. Housekeeper lädt neu und scannt.", nrDisconnected: "Getrennt. Housekeeper lädt neu.",
+  nodered_invalid_url: "Die Adresse muss mit http:// oder https:// beginnen.",
+});
+Object.assign(TEXT.en, {
+  setTabNodeRed: "Node-RED", setHintNodeRed: "Connection, so what flows use counts as used",
+  nrNotSet: "Not connected", nrConnected: "Connected", nrErrorPill: "Error", nrCachedPill: "Old flows",
+  nrIntro: "Housekeeper reads your flows (read-only) and counts the entities and devices used there as used, so cleanup does not suggest disabling them.",
+  nrState: "Status", nrRead: "Last read", nrFlows: "Flows",
+  nrHowTitle: "Where to find these values",
+  nrStepStandalone: "Standalone or Docker Node-RED: the address you open the editor at, without the trailing #flow/…. If the editor asks for a login, enter that user; read access is enough.",
+  nrStepAddon: "Home Assistant Node-RED add-on: in the add-on under Configuration → Network, give port 1880/tcp a port number, then enter http://HA-ADDRESS:PORT and use a Home Assistant user.",
+  nrStepSave: "Saving tests the connection first. Housekeeper then reloads and scans with your flows.",
+  nrUrl: "Address", nrUrlHint: "With http:// or https://. If you set httpAdminRoot in settings.js, add that path.",
+  nrUser: "Username", nrUserHint: "Only if the editor asks for a login.",
+  nrPassword: "Password", nrPasswordHint: "Leave empty to keep the saved password.",
+  nrToken: "Access token", nrTokenHint: "Instead of username and password, if you have an admin token. Leave empty to keep it.",
+  nrKept: "saved", nrSave: "Test and save", nrDisconnect: "Disconnect",
+  nrTesting: "Testing the connection …", nrDisconnecting: "Disconnecting …", nrSaved: "Connected: {n} flows found. Housekeeper reloads and scans.", nrDisconnected: "Disconnected. Housekeeper reloads.",
+  nodered_invalid_url: "The address must start with http:// or https://.",
+});
+
+// NodeRedSettingsMixin: the Node-RED connection on the settings page (the integration's configuration page).
+// Password and token never come back from the server; the form only knows whether one is saved.
+class NodeRedSettingsMixin {
+  noderedPill() {
+    const nr = this.data?.meta?.nodered;
+    if (!nr?.configured) return [this.t("nrNotSet"), "mute"];
+    if (nr.error) return [this.t(nr.cached ? "nrCachedPill" : "nrErrorPill"), "warn"];
+    return [this.t("nrConnected"), "ok"];
+  }
+
+  async loadNodeRed() {
+    if (this._nrLoading) return;
+    this._nrLoading = true;
+    try { this.nrConfig = await this._hass.callWS({ type: "ha_housekeeper/nodered_get" }); } catch (err) { this.failed(err); this.nrConfig = { url: "" }; }
+    this._nrLoading = false;
+    this.render();
+  }
+
+  noderedCard() {
+    if (!this.nrConfig) { this.loadNodeRed(); return this.skeleton("loading"); }
+    const c = this.nrConfig, nr = this.data?.meta?.nodered || {}, esc = v => this.esc(v ?? "");
+    const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
+    const state = !nr.configured ? this.t("nrNotSet") : nr.error ? `${this.t(`nodered_${nr.error}`)}${nr.cached ? ` ${this.t("noderedCached", { date: this.formatDate(nr.read_at) })}` : ""}` : this.t("nrConnected");
+    const facts = c.url ? `<div class="facts">${fact(this.t("nrState"), esc(state))}${nr.read_at ? fact(this.t("nrRead"), this.formatDate(nr.read_at)) : ""}${nr.flow_count !== undefined ? fact(this.t("nrFlows"), this.formatNumber(nr.flow_count)) : ""}</div>` : "";
+    const field = (key, label, hint, type, value, placeholder) => `<div class="optcard"><label for="nr-${key}"><strong>${label}</strong></label><small>${hint}</small><input id="nr-${key}" class="nrinput" type="${type}" data-nr="${key}" value="${esc(value)}" placeholder="${esc(placeholder)}" autocomplete="off" spellcheck="false"></div>`;
+    const kept = this.t("nrKept");
+    const fields = [
+      field("url", this.t("nrUrl"), this.t("nrUrlHint"), "url", c.url, "http://192.168.1.10:1880"),
+      field("username", this.t("nrUser"), this.t("nrUserHint"), "text", c.username, ""),
+      field("password", this.t("nrPassword"), this.t("nrPasswordHint"), "password", "", c.has_password ? kept : ""),
+      field("token", this.t("nrToken"), this.t("nrTokenHint"), "password", "", c.has_token ? kept : ""),
+    ].join("");
+    const steps = ["nrStepStandalone", "nrStepAddon", "nrStepSave"].map(k => `<li>${this.t(k)}</li>`).join("");
+    return `<section class="panel"><div class="panelhead"><div><h2>Node-RED</h2><p>${this.t("nrIntro")}</p></div></div>${facts}
+      <div class="nrhelp"><strong>${this.t("nrHowTitle")}</strong><ol>${steps}</ol></div>
+      <div class="optgrid">${fields}</div>
+      <div class="toolbar savebar"><span class="date" role="status">${esc(this.nrMessage)}</span><span class="toolgap"></span>${c.url ? `<button class="btn quiet" data-nr-disconnect>${this.t("nrDisconnect")}</button>` : ""}<button class="btn primary" data-nr-save>${this.t("nrSave")}</button></div></section>`;
+  }
+
+  async saveNodeRed(disconnect = false) {
+    const msg = { type: "ha_housekeeper/nodered_set", disconnect };
+    if (!disconnect) {
+      for (const input of this.shadowRoot.querySelectorAll("[data-nr]")) {
+        const key = input.dataset.nr, value = input.value;
+        if ((key === "password" || key === "token") && value === "") continue; // empty keeps the saved one
+        msg[key] = value;
+      }
+    }
+    this.nrMessage = this.t(disconnect ? "nrDisconnecting" : "nrTesting");
+    this.render();
+    try {
+      const result = await this._hass.callWS(msg);
+      this.nrConfig = result;
+      this.nrMessage = disconnect ? this.t("nrDisconnected") : this.t("nrSaved", { n: result.tabs });
+      this.data = null; // the integration reloads and scans with the new connection
+      this.render();
+      setTimeout(() => { this.busy = false; this.load(false); }, 4000);
+    } catch (err) {
+      this.nrMessage = err?.code?.startsWith?.("nodered_") ? this.t(err.code) : err?.code === "busy" ? this.t("optionsBusy") : err?.message || String(err);
+      this.render();
+    }
+  }
+}
 
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {
@@ -11402,6 +11502,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
     root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlan", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });
     root.querySelector("[data-opts-save]")?.addEventListener("click", () => this.saveOptions());
+    root.querySelector("[data-nr-save]")?.addEventListener("click", () => this.saveNodeRed(false));
+    root.querySelector("[data-nr-disconnect]")?.addEventListener("click", () => this.confirmAsk(this.t("nrDisconnect") + "?", () => this.saveNodeRed(true)));
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
     const optInputs = [...root.querySelectorAll("[data-opt]")];
     optInputs.forEach(el => el.oninput = () => {
@@ -11409,7 +11511,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (save) save.disabled = !optInputs.some(input => input.value !== input.dataset.saved);
     });
     root.querySelectorAll("[data-set-tab]").forEach(el => {
-      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.render(); };
+      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.nrMessage = ""; this.render(); };
       el.onkeydown = ev => {
         const ids = [...root.querySelectorAll("[data-set-tab]")].map(b => b.dataset.setTab), at = ids.indexOf(el.dataset.setTab);
         const next = { ArrowRight: ids[(at + 1) % ids.length], ArrowLeft: ids[(at - 1 + ids.length) % ids.length], Home: ids[0], End: ids[ids.length - 1] }[ev.key];
@@ -11457,7 +11559,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, NodeRedSettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0.2 - 2026-10-11
+
+### Behoben
+
+- **Node-RED-Einstellungen im Panel:** „Konfigurieren“ an der Integration öffnet das Housekeeper-Panel, daher war der Node-RED-Abschnitt im Optionsdialog nicht erreichbar. Die Verbindung steht jetzt unter **Einstellungen → Node-RED** im Panel: Status (verbunden, zuletzt gelesen, Anzahl Flows), Anleitung, Adresse, Benutzer, Passwort und Token, „Prüfen und speichern“ (prüft vor dem Speichern) und „Trennen“. Passwort und Token gehen nie an den Browser zurück; ein leeres Feld behält den gespeicherten Wert.
+
 ## 1.3.0.1 - 2026-10-11
 
 Fork-Release (Melhiser-Olson-Home) auf Basis von 1.3.0. Die vierte Stelle zählt die eigenen Releases auf einer Upstream-Version.
