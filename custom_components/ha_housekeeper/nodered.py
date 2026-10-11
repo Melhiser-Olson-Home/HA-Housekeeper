@@ -282,3 +282,64 @@ def analyze_flows(
         }
         for flow in containers.values()
     ]
+
+
+# Entities the Node-RED Companion integration creates for Node-RED nodes. Their unique ID is
+# ``nodered-<server id>-<node id>``; the node is the entity node itself (older nodes, the
+# "expose as" switch of event nodes) or the ``ha-entity-config`` node it points to.
+COMPANION_PLATFORM = "nodered"
+CONFIG_REFS = ("entityConfig", "exposeAsEntityConfig")
+# A flow reacts to these (a press, a switch, a chosen value): disabling them breaks the flow.
+# Sensors and binary sensors are written by the flow, which does not make them used.
+INPUT_DOMAINS = frozenset({"button", "switch", "number", "select", "text", "time", "date"})
+
+
+def _companion_ids(unique_id: Any) -> tuple[str, str] | None:
+    """Server and node ID from a companion unique ID; Node-RED IDs never contain a hyphen."""
+    if not isinstance(unique_id, str) or not unique_id.startswith(f"{COMPANION_PLATFORM}-"):
+        return None
+    parts = unique_id.split("-", 2)
+    return (parts[1], parts[2]) if len(parts) == 3 and parts[1] and parts[2] else None
+
+
+def created_entities(
+    flows: list[Mapping[str, Any]], entities: Iterable[Mapping[str, Any]]
+) -> list[dict[str, Any]]:
+    """Match the entities Node-RED created to the enabled flows whose nodes create them.
+
+    ``entities`` are snapshot entity items (``object_id``, ``platform``, ``unique_id``). Returns
+    ``{"entity_id", "node_id", "flows", "input", "node_missing"}`` per companion entity of a server
+    these flows know. ``node_missing`` means the node is gone from every flow, enabled or not.
+    """
+    enabled = {
+        node["id"]
+        for node in flows
+        if node.get("type") in ("tab", "subflow") and node.get("id") and not node.get("disabled")
+    }
+    known = {node["id"] for node in flows if node.get("id")}
+    servers = {node["id"] for node in flows if node.get("type") == "server" and node.get("id")}
+    owners: dict[str, set[str]] = {}
+    for node in flows:
+        if node.get("z") not in enabled or node.get("d") or not node.get("id"):
+            continue
+        for owned in (node["id"], *(node.get(ref) for ref in CONFIG_REFS)):
+            if isinstance(owned, str) and owned:
+                owners.setdefault(owned, set()).add(node["z"])
+    found: list[dict[str, Any]] = []
+    for entity in entities:
+        if entity.get("platform") != COMPANION_PLATFORM:
+            continue
+        ids = _companion_ids(entity.get("unique_id"))
+        if ids is None or ids[0] not in servers:  # another Node-RED instance: never judged
+            continue
+        entity_id = entity["object_id"]
+        found.append(
+            {
+                "entity_id": entity_id,
+                "node_id": ids[1],
+                "flows": sorted(owners.get(ids[1], ())),
+                "input": entity_id.split(".", 1)[0] in INPUT_DOMAINS,
+                "node_missing": ids[1] not in known,
+            }
+        )
+    return found

@@ -19,6 +19,7 @@ from custom_components.ha_housekeeper.cleanup import USAGE_RELATIONS  # noqa: E4
 from custom_components.ha_housekeeper.nodered import (  # noqa: E402
     NodeRedError,
     analyze_flows,
+    created_entities,
     device_serials,
 )
 from custom_components.ha_housekeeper.references import SourceError, load_source  # noqa: E402
@@ -236,3 +237,101 @@ async def test_options_check_the_node_red_address(
         )
     assert result["type"] == FlowResultType.CREATE_ENTRY
     assert entry.options["nodered_url"] == "http://nodered:1880"
+
+
+SERVER_NODE = {"id": SERVER, "type": "server", "name": "Home Assistant"}
+
+
+def companion(entity_id: str, node_id: str, server: str = SERVER):
+    return {
+        "object_id": entity_id,
+        "platform": "nodered",
+        "unique_id": f"nodered-{server}-{node_id}",
+    }
+
+
+def test_created_entities_follow_their_node_or_entity_config() -> None:
+    flows = [
+        tab("t1", "Garage"),
+        SERVER_NODE,
+        {"id": "cfg1", "type": "ha-entity-config", "server": SERVER, "name": "Door button"},
+        ha("btn", "ha-button", entityConfig="cfg1"),
+        ha("ev", "server-state-changed", exposeAsEntityConfig="cfg2"),
+        ha("old", "ha-sensor"),  # older entity nodes register under their own ID
+        ha("off", "ha-sensor", d=True),
+    ]
+    found = {
+        c["entity_id"]: c
+        for c in created_entities(
+            flows,
+            [
+                companion("button.door", "cfg1"),
+                companion("switch.expose", "cfg2"),
+                companion("sensor.old", "old"),
+                companion("sensor.disabled_node", "off"),
+                companion("sensor.gone", "deleted"),
+                companion("sensor.other_server", "x", server="elsewhere"),
+                {"object_id": "light.porch", "platform": "hue", "unique_id": "nodered-srv1-btn"},
+            ],
+        )
+    }
+    assert set(found) == {
+        "button.door", "switch.expose", "sensor.old", "sensor.disabled_node", "sensor.gone"
+    }  # fmt: skip
+    assert found["button.door"]["flows"] == ["t1"] and found["button.door"]["input"]
+    assert found["switch.expose"]["flows"] == ["t1"] and found["switch.expose"]["input"]
+    assert found["sensor.old"]["flows"] == ["t1"] and not found["sensor.old"]["input"]
+    # A disabled node still exists: no owner, but not left behind either.
+    assert found["sensor.disabled_node"] == {
+        "entity_id": "sensor.disabled_node", "node_id": "off", "flows": [],
+        "input": False, "node_missing": False,
+    }  # fmt: skip
+    assert found["sensor.gone"]["node_missing"] is True
+
+
+async def test_scan_links_created_entities_and_flags_leftovers(hass: HomeAssistant) -> None:
+    registry = er.async_get(hass)
+
+    def create(domain: str, node_id: str):
+        entry = registry.async_get_or_create(
+            domain, "nodered", f"nodered-{SERVER}-{node_id}", suggested_object_id=node_id
+        )
+        hass.states.async_set(entry.entity_id, "on")
+        return entry.entity_id
+
+    button, sensor, leftover = (
+        create("button", "btn"),
+        create("sensor", "sns"),
+        create("sensor", "gone"),
+    )
+    flows = [
+        tab("t1", "Garage"),
+        SERVER_NODE,
+        ha("btn", "ha-button"),
+        ha("sns", "ha-sensor"),
+    ]
+    scanner = await make_scanner(hass)
+    scanner.nodered = {"url": "http://nodered:1880"}
+    with patch(FETCH, return_value=flows):
+        snapshot = await scanner.async_scan()
+
+    def relation(entity_id: str):
+        return [
+            e["relation"] for e in snapshot["edges"]
+            if e["source"] == "nodered_flow:t1" and e["target"] == f"entity:{entity_id}"
+        ]  # fmt: skip
+
+    assert relation(button) == ["TRIGGERS_ON"]  # used: disabling it breaks the flow
+    assert relation(sensor) == ["PROVIDES"]  # only written: still counts as unused
+    assert not any(
+        e["target"] == f"entity:{sensor}" and e["relation"] in USAGE_RELATIONS
+        for e in snapshot["edges"]
+    )
+    [gone] = [f for f in snapshot["findings"] if f["rule_id"] == "entity.nodered_node_missing"]
+    assert gone["object_id"] == leftover and gone["classification"] == "orphaned"
+
+    # From the cached copy nothing is called left behind; the links stay.
+    with patch(FETCH, side_effect=NodeRedError("cannot_connect")):
+        snapshot = await scanner.async_scan()
+    assert not [f for f in snapshot["findings"] if f["rule_id"] == "entity.nodered_node_missing"]
+    assert relation(button) == ["TRIGGERS_ON"]

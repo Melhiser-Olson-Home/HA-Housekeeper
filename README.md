@@ -236,6 +236,7 @@ Automations built in Node-RED live outside Home Assistant, so on their own they 
 - Entity IDs in templates, function code and switch or change rules are **probable**. So are device IDs and **device serial numbers** found there. Event-driven flows (for example Lutron Pico remotes matched by serial from `lutron_caseta_button_event`) then mark the *device* as possibly used, so disabling or removing it shows a warning. The device's own entities are judged by their own links, so unused ones remain candidates.
 - If Node-RED cannot be reached, the scan uses the flows from the last successful read and the overview says so. That way an outage never makes Node-RED's uses vanish.
 - Replacing references and renaming list Node-RED flows as places to adjust by hand.
+- **Entities Node-RED creates** (through the Node-RED Companion integration) are matched to the flow whose node creates them. Inputs the flow reacts to (buttons, switches, numbers, selects, text, and the "expose as" switches) count as used, for certain. Sensors and binary sensors the flow only writes to are linked but still count as unused if nothing reads them. If the node behind such an entity no longer exists in any flow, Housekeeper reports the entity as left behind. It does this only after a fresh read, and only for a Node-RED server found in the flows.
 
 ### Dependency explorer
 

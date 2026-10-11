@@ -8,6 +8,7 @@ Fork-Release (Melhiser-Olson-Home) auf Basis von 1.3.0. Die vierte Stelle zählt
 
 - **Fork:** Manifest, Panel-Links, Installationsanleitung und Badges zeigen auf Melhiser-Olson-Home/HA-Housekeeper; die README nennt den Fork und das Original. Lizenz und Urheberangaben des Originals bleiben.
 - **Node-RED-Flows:** Mit einer Node-RED-Adresse in den Optionen liest Housekeeper die Flows über die Admin-API (nur lesend, mit einem Lese-Token). Jeder aktive Flow-Tab und Subflow wird zu einem Objekt „Node-RED-Flow“, dessen Knoten Entitäten, Geräte, Bereiche, Etagen und Labels nutzen, wie bei einer Automation. Felder der Home-Assistant-Knoten zählen als sicher. Vorlagen, Funktionscode und Regeln zählen als wahrscheinlich, ebenso Geräte-IDs und Seriennummern darin (z. B. Lutron-Picos aus `lutron_caseta_button_event`). Ein Gerät, das so genutzt wird, warnt vor dem Deaktivieren; seine unbenutzten Entitäten bleiben Kandidaten. Fehlende Entitäten in Flows werden als fehlende Verweise gemeldet. Ist Node-RED nicht erreichbar, gelten die zuletzt gelesenen Flows, und die Übersicht weist darauf hin.
+- **Von Node-RED angelegte Entitäten:** Entitäten der Integration Node-RED Companion werden über ihre Unique-ID dem erzeugenden Flow zugeordnet. Eingaben (Taster, Schalter, Zahlen, Auswahlen, Text, „Expose as“-Schalter) gelten als sicher verwendet, Sensoren nur als bereitgestellt. Gibt es den Knoten nicht mehr, meldet Housekeeper die Entität als zurückgeblieben (`entity.nodered_node_missing`).
 
 ## 1.3.0 - 2026-10-11
 

@@ -235,6 +235,7 @@ In Node-RED gebaute Automationen liegen außerhalb von Home Assistant; ohne sie 
 - Felder der Home-Assistant-Knoten, die eine Entität, ein Gerät, einen Bereich, eine Etage oder ein Label nennen, sind **sicher**; fehlt das Ziel, gibt es einen Befund *fehlender Verweis*.
 - Entitäts-IDs in Vorlagen, Funktionscode und Regeln sind **wahrscheinlich**, ebenso Geräte-IDs und **Seriennummern** von Geräten (z. B. Lutron-Picos aus `lutron_caseta_button_event`). Das Gerät warnt dann vor dem Deaktivieren oder Entfernen; seine eigenen Entitäten werden nach ihren eigenen Verweisen beurteilt.
 - Ist Node-RED nicht erreichbar, gelten die zuletzt gelesenen Flows, und die Übersicht sagt es.
+- **Entitäten, die Node-RED anlegt** (über die Integration Node-RED Companion), werden dem Flow zugeordnet, dessen Knoten sie erzeugt. Eingaben, auf die der Flow reagiert (Taster, Schalter, Zahlen, Auswahlen, Text, „Expose as“-Schalter), gelten sicher als verwendet; Sensoren, die der Flow nur beschreibt, nicht. Gibt es den Knoten in keinem Flow mehr, meldet Housekeeper die Entität als zurückgeblieben, nur nach einem frischen Lesen und nur für einen Node-RED-Server aus den Flows.
 
 ### Abhängigkeitsansicht
 

@@ -78,7 +78,13 @@ from .issues import async_sync_issues
 from .maintenance import PreflightStore
 from .marks import MarkStore, apply_marks, mark_key
 from .nodered import OBJECT_TYPE as NODERED_TYPE
-from .nodered import NodeRedError, analyze_flows, async_fetch_flows, device_serials
+from .nodered import (
+    NodeRedError,
+    analyze_flows,
+    async_fetch_flows,
+    created_entities,
+    device_serials,
+)
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
 from .observations import ObservationStore
@@ -817,7 +823,7 @@ class InventoryScanner:
         dashboard_edges.extend(energy_edges)
         helper_edges, helper_findings = self._helper_inventory(existing_objects)
         flows, flow_edges, flow_findings, nodered_status = await self._nodered_inventory(
-            existing_objects, device_entries, preliminary
+            existing_objects, device_entries, entities, preliminary
         )
         group_edges, group_findings = self._group_inventory(existing_objects)
         known_automation_ids = {item["object_id"] for item in automations}
@@ -1337,7 +1343,11 @@ class InventoryScanner:
         return edges, findings
 
     async def _nodered_inventory(
-        self, existing: dict[str, set[str]], devices: list[Any], preliminary: bool
+        self,
+        existing: dict[str, set[str]],
+        devices: list[Any],
+        entities: list[dict[str, Any]],
+        preliminary: bool,
     ) -> tuple[list[dict[str, Any]], list[dict[str, str]], list[dict[str, Any]], dict[str, Any]]:
         """Describe Node-RED flows through the entities and devices they use.
 
@@ -1414,6 +1424,39 @@ class InventoryScanner:
                     "references": references,
                 }
             )
+        # Entities Node-RED created: inputs the flow reacts to are used, outputs only provided.
+        flow_ids = {item["object_id"] for item in items}
+        for created in created_entities(flows, entities):
+            for flow_id in created["flows"]:
+                if flow_id not in flow_ids:
+                    continue
+                edges.append(
+                    {
+                        "source": f"{NODERED_TYPE}:{flow_id}",
+                        "target": f"entity:{created['entity_id']}",
+                        "relation": "TRIGGERS_ON" if created["input"] else "PROVIDES",
+                        "confidence": "certain",
+                        "location": f"node:{created['node_id']}",
+                    }
+                )
+            # A cached copy may predate a new node: only a fresh read can say one is gone.
+            if created["node_missing"] and not status["cached"]:
+                findings.append(
+                    {
+                        "rule_id": "entity.nodered_node_missing",
+                        "object_id": created["entity_id"],
+                        "classification": "orphaned",
+                        "confidence": 0.95,
+                        "first_detected_at": None,
+                        "evidence": [
+                            {
+                                "kind": "nodered_node_missing",
+                                "source": "nodered_flows",
+                                "location": created["node_id"],
+                            }
+                        ],
+                    }
+                )
         status["flow_count"] = len(items)
         return items, edges, findings, status
 
