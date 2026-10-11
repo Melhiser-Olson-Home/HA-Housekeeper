@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/bertel2020/HA-Housekeeper/main/custom_components/ha_housekeeper/brand/logo.png" alt="HA Housekeeper" width="160">
+  <img src="https://raw.githubusercontent.com/Melhiser-Olson-Home/HA-Housekeeper/main/custom_components/ha_housekeeper/brand/logo.png" alt="HA Housekeeper" width="160">
 </p>
 
 <h1 align="center">HA Housekeeper</h1>
@@ -11,9 +11,9 @@
 <p align="center">
   <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg" alt="HACS Custom"></a>
   <a href="https://www.home-assistant.io/"><img src="https://img.shields.io/badge/Home%20Assistant-Custom%20Integration-18BCF2.svg?logo=home-assistant&logoColor=white" alt="Home Assistant"></a>
-  <a href="https://github.com/bertel2020/HA-Housekeeper/releases"><img src="https://img.shields.io/github/v/release/bertel2020/HA-Housekeeper?sort=semver&include_prereleases" alt="Release"></a>
-  <a href="https://github.com/bertel2020/HA-Housekeeper/actions/workflows/validate.yml"><img src="https://github.com/bertel2020/HA-Housekeeper/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/bertel2020/HA-Housekeeper" alt="License"></a>
+  <a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/releases"><img src="https://img.shields.io/github/v/release/Melhiser-Olson-Home/HA-Housekeeper?sort=semver&include_prereleases" alt="Release"></a>
+  <a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/actions/workflows/validate.yml"><img src="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/Melhiser-Olson-Home/HA-Housekeeper" alt="License"></a>
 </p>
 
 <p align="center">
@@ -22,7 +22,9 @@
   <a href="https://paypal.me/RobertoMartins"><img src="https://img.shields.io/badge/PayPal-donate-00457C?logo=paypal&logoColor=white" alt="PayPal"></a>
 </p>
 
-<p align="center"><em><a href="https://github.com/bertel2020/HA-Housekeeper/blob/main/README.md">English version</a></em></p>
+<p align="center"><em><a href="https://github.com/Melhiser-Olson-Home/HA-Housekeeper/blob/main/README.md">English version</a></em></p>
+
+> **Dies ist ein Fork** von [bertel2020/HA-Housekeeper](https://github.com/bertel2020/HA-Housekeeper) von Roberto (bertel2020), gepflegt von Melhiser-Olson-Home. Er ergänzt **[Node-RED-Flows](#node-red-flows)**: Entitäten und Geräte, die deine Flows nutzen, gelten als verwendet, und das Aufräumen schlägt nicht vor, sie zu deaktivieren. Fork-Releases tragen eine vierte Versionsstelle auf der Upstream-Version, auf der sie beruhen (z. B. `1.3.0.1` auf `1.3.0`). Probleme mit diesem Fork bitte [hier](https://github.com/Melhiser-Olson-Home/HA-Housekeeper/issues) melden, nicht upstream. Die Spendenlinks oben unterstützen den ursprünglichen Autor.
 
 HA Housekeeper ist eine Wartungs- und Analyseintegration für Home Assistant. Sie erstellt ein übersichtliches Inventar der Installation, erklärt verdächtige oder verwaiste Objekte und zeigt, wie Entitäten, Geräte, Integrationen, Bereiche und Automationen voneinander abhängen.
 
@@ -85,7 +87,7 @@ Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz un
 
 ### Über HACS (empfohlen)
 
-[![HACS-Repository in My Home Assistant öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bertel2020&repository=HA-Housekeeper&category=integration)
+[![HACS-Repository in My Home Assistant öffnen](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Melhiser-Olson-Home&repository=HA-Housekeeper&category=integration)
 [![HA Housekeeper zu My Home Assistant hinzufügen](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=ha_housekeeper)
 
 1. Über den ersten Button das Housekeeper-Repository in HACS öffnen.
@@ -97,12 +99,12 @@ Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz un
 4. Anschließend als Administrator **Housekeeper** in der Seitenleiste öffnen.
 
 Falls der erste Button nicht funktioniert, in HACS unter **Integrationen →
-Benutzerdefinierte Repositories** `https://github.com/bertel2020/HA-Housekeeper`
+Benutzerdefinierte Repositories** `https://github.com/Melhiser-Olson-Home/HA-Housekeeper`
 als Kategorie **Integration** eintragen.
 
-Solange Housekeeper noch nicht in der normalen HACS-Suche erscheint, registriert
-der erste Button das Projekt als benutzerdefiniertes Repository. Den Stand der
-Aufnahme zeigt [hacs/default#11766](https://github.com/hacs/default/pull/11766).
+Dieser Fork ist nicht im normalen HACS-Store; der erste Button registriert ihn
+daher als benutzerdefiniertes Repository. Das HA Housekeeper im Store ist die
+Originalversion ohne Node-RED-Unterstützung.
 
 ### Manuell
 

@@ -408,7 +408,7 @@ const OPTION_FIELDS = [
   ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 30],
 ];
 const START_VIEWS = ["overview", "findingsNav", "inventory", "changes", "batteries"];
-const REPO_URL = "https://github.com/bertel2020/HA-Housekeeper";
+const REPO_URL = "https://github.com/Melhiser-Olson-Home/HA-Housekeeper";
 // Palettes for explicit light/dark; taken from the Zeitarchiv app's design system (app.css).
 // "standard" keeps the Home Assistant accent and, in automatic mode, the Home Assistant theme itself.
 const SCHEMES = {
