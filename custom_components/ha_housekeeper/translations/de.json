@@ -27,7 +27,7 @@
         "sections": {
           "nodered": {
             "name": "Node-RED (optional)",
-            "description": "Damit sieht Housekeeper, welche Entitäten und Geräte deine Node-RED-Flows nutzen, und schlägt nicht vor, sie zu deaktivieren. Die Flows werden nur gelesen und nie geändert. Beim Speichern prüft Housekeeper die Verbindung.\n\n**Eigenständiges Node-RED oder Docker:** Nimm die Adresse, unter der du den Editor öffnest. Verlangt der Editor eine Anmeldung, trage diesen Benutzer ein (Lesezugriff genügt).\n\n**Node-RED-Add-on von Home Assistant:** Öffne das Add-on, gehe zu **Konfiguration → Netzwerk** und gib Port `1880/tcp` eine Portnummer. Nimm dann `http://HA-ADRESSE:PORT` (z. B. `http://homeassistant.local:1880`) und melde dich mit einem Home-Assistant-Benutzer an.",
+            "description": "Damit sieht Housekeeper, welche Entitäten und Geräte deine Node-RED-Flows nutzen, und schlägt nicht vor, sie zu deaktivieren. Die Flows werden nur gelesen und nie geändert. Beim Speichern prüft Housekeeper die Verbindung.\n\n**Eigenständiges Node-RED oder Docker:** Nimm die Adresse, unter der du den Editor öffnest. Verlangt der Editor eine Anmeldung, trage diesen Benutzer ein (Lesezugriff genügt).\n\n**Node-RED-Add-on von Home Assistant:** Öffne das Add-on, gehe zu **Konfiguration → Netzwerk** und gib Port `1880/tcp` eine Portnummer. Nimm dann `{addon_pattern}` (z. B. `{addon_example}`) und melde dich mit einem Home-Assistant-Benutzer an.",
             "data": {
               "nodered_url": "Node-RED-Adresse",
               "nodered_username": "Benutzername",
@@ -35,7 +35,7 @@
               "nodered_token": "Zugriffstoken"
             },
             "data_description": {
-              "nodered_url": "Die Adresse des Node-RED-Editors ohne das angehängte `#flow/...`, z. B. `http://192.168.1.10:1880`. Ist in settings.js `httpAdminRoot` gesetzt, hänge diesen Pfad an, z. B. `http://192.168.1.10:1880/admin`.",
+              "nodered_url": "Die Adresse des Node-RED-Editors ohne das angehängte `#flow/...`, z. B. `{url_example}`. Ist in settings.js `httpAdminRoot` gesetzt, hänge diesen Pfad an, z. B. `{admin_example}`.",
               "nodered_username": "Nur wenn der Editor eine Anmeldung verlangt (`adminAuth` in settings.js oder beim Add-on ein Home-Assistant-Benutzer). Sonst leer lassen.",
               "nodered_password": "Das Passwort dieses Benutzers.",
               "nodered_token": "Statt Benutzername und Passwort, wenn du schon ein Node-RED-Admin-Token hast (z. B. aus `adminAuth.tokens` in settings.js). Sonst leer lassen."

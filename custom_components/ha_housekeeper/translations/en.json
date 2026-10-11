@@ -27,7 +27,7 @@
         "sections": {
           "nodered": {
             "name": "Node-RED (optional)",
-            "description": "Lets Housekeeper see which entities and devices your Node-RED flows use, so it does not suggest disabling them. It only reads your flows and never changes them. Housekeeper tests the connection when you save.\n\n**Standalone or Docker Node-RED:** use the address you open the editor at. If the editor asks for a login, enter that user (read access is enough).\n\n**Home Assistant Node-RED add-on:** open the add-on, go to **Configuration → Network**, and give port `1880/tcp` a port number. Then use `http://YOUR-HA-ADDRESS:PORT` (for example `http://homeassistant.local:1880`) and log in with a Home Assistant user.",
+            "description": "Lets Housekeeper see which entities and devices your Node-RED flows use, so it does not suggest disabling them. It only reads your flows and never changes them. Housekeeper tests the connection when you save.\n\n**Standalone or Docker Node-RED:** use the address you open the editor at. If the editor asks for a login, enter that user (read access is enough).\n\n**Home Assistant Node-RED add-on:** open the add-on, go to **Configuration → Network**, and give port `1880/tcp` a port number. Then use `{addon_pattern}` (for example `{addon_example}`) and log in with a Home Assistant user.",
             "data": {
               "nodered_url": "Node-RED address",
               "nodered_username": "Username",
@@ -35,7 +35,7 @@
               "nodered_token": "Access token"
             },
             "data_description": {
-              "nodered_url": "The address of the Node-RED editor without the trailing `#flow/...`, for example `http://192.168.1.10:1880`. If you set `httpAdminRoot` in settings.js, add that path, for example `http://192.168.1.10:1880/admin`.",
+              "nodered_url": "The address of the Node-RED editor without the trailing `#flow/...`, for example `{url_example}`. If you set `httpAdminRoot` in settings.js, add that path, for example `{admin_example}`.",
               "nodered_username": "Only if the editor asks for a login (`adminAuth` in settings.js, or a Home Assistant user for the add-on). Leave empty otherwise.",
               "nodered_password": "The password of that user.",
               "nodered_token": "Use this instead of username and password if you already have a Node-RED admin access token (for example from `adminAuth.tokens` in settings.js). Leave empty otherwise."
